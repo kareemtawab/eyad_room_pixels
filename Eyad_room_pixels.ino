@@ -20,7 +20,7 @@ IPAddress local_IP(192, 168, 1, 159);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(192, 168, 1, 167);   //optional
-IPAddress secondaryDNS(8, 8, 4, 4); //optional
+IPAddress secondaryDNS(8, 8, 8, 8); //optional
 
 String MAIN_page() {
   String ptr = "<!DOCTYPE html> <html>\n";
@@ -121,12 +121,10 @@ void handleForm() {
 }
 
 void setup() {
-  scrolltext.reserve(32);
   Disp.setBrightness(DISPLAY_BRIGHTNESS); //maximum is 1024
   Disp.start();
   Disp.setFont(DISP_FONT);
-  Disp.drawText(0, 0, ".con");
-  Disp.loop();
+  scrolltext.reserve(32);
   WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
   WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS);
   wifiMulti.addAP("WAW20", "219adeltawab");
@@ -137,9 +135,9 @@ void setup() {
   wifiMulti.run();
   WiFi.hostname("EyadDMD");
   MDNS.begin("EyadDMD");
+  ElegantOTA.begin(&server);
   server.on("/", handleRoot);
   server.on("/action_page", handleForm);
-  ElegantOTA.begin(&server);
   server.begin();
   for (int i = 0; i < 512; i++) {
     blinkfrequency[i] = random(400, 600);
@@ -163,6 +161,7 @@ void loop() {
       for (int m = 0; m < 16; m++) {
         for (int i = 0; i < 32; i++) {
           Disp.setPixel(i, m, ledstate[i + 32 * m]);
+          yield();
         }
       }
       break;
